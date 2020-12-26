@@ -8,9 +8,12 @@ var status = document.getElementById("status");
 var myId = document.getElementById("my-id");
 var partnesId = document.getElementById("partners-id");
 var connectButton = document.getElementById("connect-button");
-var receivedMessage = document.getElementById("received-message");
+var receivedMessage = document.getElementById("received-messages");
 var messageToSend = document.getElementById("message-to-send");
 var sendButton = document.getElementById("send-button");
+
+var MY_ID = "";
+var PEER_ID = "";
 
 // Happens to all
 function init() {
@@ -22,6 +25,7 @@ function init() {
         }
         else {
             console.log("My ID is", peer.id);
+            MY_ID = peer.id;
             document.getElementById("my-id").innerHTML = "My ID is " + peer.id;
             document.getElementById("status").innerHTML = "Status: Awaiting connection...";
         }
@@ -31,6 +35,7 @@ function init() {
     peer.on("connection", function (c) {
         conn = c;
         console.log(conn.peer, "connected to you");
+        PEER_ID = conn.peer;
         document.getElementById("status").innerHTML = "Status: " + conn.peer + " connected to you";
         ready();
     });
@@ -51,12 +56,13 @@ function join() {
 
     conn.on("open", function () {
         console.log("Connected to", conn.peer);
+        PEER_ID = conn.peer;
         document.getElementById("status").innerHTML = "Status: Connected to " + conn.peer;
     });
 
     conn.on("data", function (data) {
         console.log(conn.peer, "sent you", data);
-        document.getElementById("received-message").innerHTML = conn.peer + " sent you " + data;
+        addMessage(PEER_ID, data);
     });
 
     var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
@@ -75,7 +81,7 @@ function join() {
 function ready() {
     conn.on("data", function (data) {
         console.log(conn.peer, "sent you", data);
-        document.getElementById("received-message").innerHTML = conn.peer + " sent you " + data;
+        addMessage(PEER_ID, data);
     });
 
     var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
@@ -96,7 +102,17 @@ function send() {
     var message = document.getElementById("message-to-send").value;
     if (message != "") {
         conn.send(message);
+        addMessage(MY_ID, message);
+        document.getElementById("message-to-send").value = "";
     }
+}
+
+// All
+function addMessage(sender, message) {
+    var newLiElement = document.createElement("li");
+    var newMessage = document.createTextNode(sender + " at " + Date.now() + ": " + message);
+    newLiElement.appendChild(newMessage);
+    document.getElementById("received-messages").appendChild(newLiElement);
 }
 
 window.addEventListener("load", function () {
