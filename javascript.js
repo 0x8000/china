@@ -22,6 +22,11 @@ var DRAWING_DATA = {
     colour: "#FF0000",
 };
 
+const PROTOCOL = {
+    TEXT_MESSAGE: 0,
+    DRAWING: 1,
+};
+
 // Happens to all
 function init() {
     peer = new Peer(null, {});
@@ -47,6 +52,7 @@ function init() {
         ready();
     });
 
+    // Open my/local webcam
     let localStream = null;
     const startChat = async () => {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true })
@@ -69,7 +75,7 @@ function join() {
 
     conn.on("data", function (data) {
         console.log(conn.peer, "sent you", data);
-        addMessage(PEER_ID, data);
+        handleReceivedData(data);
     });
 
     var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
@@ -88,9 +94,10 @@ function join() {
 function ready() {
     conn.on("data", function (data) {
         console.log(conn.peer, "sent you", data);
-        addMessage(PEER_ID, data);
+        handleReceivedData(data);
     });
 
+    // Start peers/remote A+V
     var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
     peer.on("call", function (call) {
         getUserMedia({ video: true, audio: true }, function (stream) {
@@ -105,10 +112,10 @@ function ready() {
 }
 
 // All
-function send() {
+function sendTextMessage() {
     var message = document.getElementById("message-to-send").value;
     if (message != "") {
-        conn.send(message);
+        conn.send(preparePacketForSending(PROTOCOL.TEXT_MESSAGE, message));
         addMessage(MY_ID, message);
         document.getElementById("message-to-send").value = "";
     }
@@ -134,6 +141,38 @@ function drawLine(x0, y0, x1, y1, colour, emit) {
 
     if (emit) {
         // TODO: Form data and send it
+        var dataToSend = {
+            x0: x0,
+            y0: y0,
+            x1: x1,
+            y1: y1,
+            colour: "#FF0000",
+        };
+        console.log(dataToSend);
+        conn.send(preparePacketForSending(PROTOCOL.DRAWING, dataToSend));
+    }
+}
+
+function preparePacketForSending(protocol, payload) {
+    return data = {
+        protocol: protocol,
+        payload: payload
+    };
+}
+
+function handleReceivedData(data) {
+    switch (data["protocol"]) {
+        case PROTOCOL.TEXT_MESSAGE:
+            console.log("Text");
+            addMessage(PEER_ID, data["payload"]);
+            break;
+        case PROTOCOL.DRAWING:
+            console.log("Drawing...");
+            drawLine(data["payload"]["x0"], data["payload"]["y0"], data["payload"]["x1"], data["payload"]["y1"], data["payload"]["colour"], false);
+            break;
+        default:
+            console.log("Something new...");
+            break;
     }
 }
 
@@ -174,7 +213,7 @@ function onResize() {
 
 window.addEventListener("load", function () {
     document.getElementById("connect-button").addEventListener("click", join);
-    document.getElementById("send-button").addEventListener("click", send);
+    document.getElementById("send-button").addEventListener("click", sendTextMessage);
     init();
 
     document.getElementById("whiteboard").addEventListener("mousedown", onMouseDown, false);
