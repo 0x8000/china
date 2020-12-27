@@ -27,6 +27,7 @@ const COLOURS = {
 var SELECTED_COLOUR = COLOURS.BLACK;
 
 var DRAWING = false;
+var DRAWING_TEXT = false;
 var DRAWING_DATA = {
     x: 0,
     y: 0,
@@ -38,14 +39,18 @@ const PROTOCOL = {
     DRAWING: 1,
     CANVAS_SETTINGS_INIT: 2,
     CANVAS_SETTINGS_FINAL: 3,
+    DRAWING_TEXT: 4,
 };
 
 // Happens to all
 function init() {
     document.getElementById("message-to-send").setAttribute("disabled", "disabled");
     document.getElementById("send-button").setAttribute("disabled", "disabled");
+    document.getElementById("settings-button").setAttribute("disabled", "disabled");
+    document.getElementById("quit-button").setAttribute("disabled", "disabled");
 
     document.getElementById("whiteboard").style.display = "none";
+    document.getElementById("colour-buttons").style.display = "none";
 
     peer = new Peer(null, {});
 
@@ -74,6 +79,10 @@ function init() {
         document.getElementById("connect-button").setAttribute("disabled", "disabled");
         document.getElementById("message-to-send").removeAttribute("disabled");
         document.getElementById("send-button").removeAttribute("disabled");
+        document.getElementById("settings-button").removeAttribute("disabled");
+        document.getElementById("quit-button").removeAttribute("disabled");
+
+        document.getElementById("colour-buttons").style.display = "flex";
 
         ready();
     });
@@ -104,6 +113,10 @@ function join() {
         document.getElementById("connect-button").setAttribute("disabled", "disabled");
         document.getElementById("message-to-send").removeAttribute("disabled");
         document.getElementById("send-button").removeAttribute("disabled");
+        document.getElementById("settings-button").removeAttribute("disabled");
+        document.getElementById("quit-button").removeAttribute("disabled");
+
+        document.getElementById("colour-buttons").style.display = "flex";
 
         fixCanvas();
     });
@@ -188,6 +201,23 @@ function drawLine(x0, y0, x1, y1, colour, emit) {
     }
 }
 
+function drawText(x, y, text, colour, emit) {
+    var context = document.getElementById("whiteboard").getContext("2d");
+    context.font = "25px Verdana";
+    context.fillStyle = colour;
+    context.fillText(text, x, y);
+
+    if (emit) {
+        var dataToSend = {
+            x: x,
+            y: y,
+            text: text,
+            colour: colour
+        };
+        conn.send(preparePacketForSending(PROTOCOL.DRAWING_TEXT, dataToSend));
+    }
+}
+
 function preparePacketForSending(protocol, payload) {
     return data = {
         protocol: protocol,
@@ -222,6 +252,10 @@ function handleReceivedData(data) {
             setCanvasSize(data["payload"]["canvasWidth"], data["payload"]["canvasHeight"]);
             document.getElementById("whiteboard").style.display = "block";
             break;
+        case PROTOCOL.DRAWING_TEXT:
+            console.log("Drawing text...");
+            drawText(data["payload"]["x"], data["payload"]["y"], data["payload"]["text"], data["payload"]["colour"], false);
+            break;
         default:
             console.log("Something new...");
             break;
@@ -239,9 +273,17 @@ function drawGetY(e) {
 }
 
 function onMouseDown(e) {
-    DRAWING = true;
-    DRAWING_DATA.x = drawGetX(e);
-    DRAWING_DATA.y = drawGetY(e);
+    if (DRAWING_TEXT) {
+        var text = window.prompt("Enter text");
+        drawText(drawGetX(e), drawGetY(e), text, SELECTED_COLOUR, true);
+        DRAWING_TEXT = false;
+        document.getElementById("text-to-whiteboard").classList.remove("is-focused");
+    }
+    else {
+        DRAWING = true;
+        DRAWING_DATA.x = drawGetX(e);
+        DRAWING_DATA.y = drawGetY(e);
+    }
 }
 
 function onMouseUp(e) {
@@ -271,6 +313,12 @@ function fixCanvas() {
     conn.send(preparePacketForSending(PROTOCOL.CANVAS_SETTINGS_INIT, canvasSettings));
 }
 
+// Text to whiteboard
+function textToWhiteboard() {
+    document.getElementById("text-to-whiteboard").classList.add("is-focused");
+    DRAWING_TEXT = true;
+}
+
 // Front, settings
 function copyMyId() {
     document.getElementById("my-id").select();
@@ -294,6 +342,7 @@ window.addEventListener("load", function () {
 
     document.getElementById("copy-id-button").addEventListener("click", copyMyId);
 
+    // Whiteboard colours
     document.getElementById("colour-white").addEventListener("click", function(){
         SELECTED_COLOUR = COLOURS.WHITE;
     });
@@ -312,4 +361,22 @@ window.addEventListener("load", function () {
     document.getElementById("colour-red").addEventListener("click", function(){
         SELECTED_COLOUR = COLOURS.RED;
     });
+    document.getElementById("text-to-whiteboard").addEventListener("click", textToWhiteboard);
+
+    // Buttons
+    document.getElementById("settings-button").addEventListener("click", function(){
+        document.getElementById("modal-settings").style.display = "flex";
+    });
+
+    // Modal, settings
+    document.getElementById("modal-settings-close").addEventListener("click", function(){
+        document.getElementById("modal-settings").style.display = "none";
+    });
+    document.getElementById("modal-settings-cancel").addEventListener("click", function(){
+        document.getElementById("modal-settings").style.display = "none";
+    });
+    
+    //modal-settings-save
+    
+
 });

@@ -11,6 +11,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.3.1/peerjs.min.js"
         integrity="sha512-wNUAk/IKoDcVSiKiN/0ormRTzENc9IbFdHa/BWNuLPtp2kG53TLf5dobOeCHoeafnlaSfjKAiSewS6AJspm/Iw=="
         crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+        integrity="sha512-+4zCK9k+qNFUR5X+cKL9EIR+ZOhtIloNl9GIKS57V1MyNsYpYcUrUeQc9vNfzsWfV28IaLL3i96P9sdNyeRssA=="
+        crossorigin="anonymous" />
     <script src="javascript.js"></script>
 </head>
 
@@ -44,8 +47,8 @@
                 </div>
                 <div class="column is-one-fifth">
                     <div class="buttons">
-                        <button class="button is-warning is-small">Settings</button>
-                        <button class="button is-danger is-small">Quit</button>
+                        <button id="settings-button" class="button is-warning is-small">Settings</button>
+                        <button id="quit-button" class="button is-danger is-small">Quit</button>
                     </div>
                 </div>
                 <div class="column">
@@ -75,13 +78,18 @@
                     </div>
                 </div>
                 <div id="drawing-area" class="column">
-                    <div class="buttons is-centered">
+                    <div id="colour-buttons" class="buttons is-centered">
                         <button id="colour-white" class="button is-small"></button>
                         <button id="colour-black" class="button is-black is-small"></button>
                         <button id="colour-blue" class="button is-info is-small"></button>
                         <button id="colour-green" class="button is-success is-small"></button>
                         <button id="colour-yellow" class="button is-warning is-small"></button>
                         <button id="colour-red" class="button is-danger is-small"></button>
+                        <button id="text-to-whiteboard" class="button is-small">
+                            <span class="icon is-small">
+                                <i class="fas fa-font"></i>
+                            </span>
+                        </button>
                     </div>
                     <center>
                         <canvas id="whiteboard" width="100%" height="100%" style="border:1px solid #dbdbdb;"></canvas>
@@ -111,6 +119,23 @@
             </div>
         </div>
     </section>
+
+    <div id="modal-settings" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title">Settings</p>
+                <button id="modal-settings-close" class="delete" aria-label="close"></button>
+            </header>
+            <section class="modal-card-body">
+                <!-- Content ... -->
+            </section>
+            <footer class="modal-card-foot">
+                <button id="modal-settings-save" class="button is-info">Save changes</button>
+                <button id="modal-settings-cancel" class="button">Cancel</button>
+            </footer>
+        </div>
+    </div>
 
     <footer class="footer">
         <div class="content has-text-centered">
