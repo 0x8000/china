@@ -17,50 +17,80 @@
 <body>
     <section class="section">
         <div class="container">
-            <h1 class="title">
-                Let's paint together!
-            </h1>
-            <p class="subtitle">
-                Simple, collaborative <strong>paint</strong>!
-            </p>
-        </div>
-    </section>
-    <section class="section">
-        <div class="container">
-            <div class="columns">
-                <div class="column is-one-third">
-                    <p id="status">Status...</p>
-                    <p id="my-id">Your ID...</p>
+            <div class="columns is-vcentered">
+                <div class="column is-one-quarter">
                     <div class="field has-addons">
                         <div class="control">
-                            <input class="input" type="text" id="partners-id" placeholder="Partner's ID">
+                            <input id="my-id" class="input is-small" type="text" value="My ID" readonly>
                         </div>
                         <div class="control">
-                            <a class="button is-info" id="connect-button">
+                            <a id="copy-id-button" class="button is-small">
+                                Copy
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="column is-one-quarter">
+                    <div class="field has-addons">
+                        <div class="control">
+                            <input class="input is-small" type="text" id="partners-id" placeholder="Partner's ID">
+                        </div>
+                        <div class="control">
+                            <a class="button is-info is-small" id="connect-button">
                                 Connect
                             </a>
                         </div>
                     </div>
                 </div>
-                <div class="column is-one-third">
-                    <p>Received messages...</p>
-                    <ul id="received-messages">
-                    </ul> 
-                    <textarea id="message-to-send" class="textarea" placeholder="Enter message..."></textarea>
-                    <div class="control">
-                        <button id="send-button" class="button is-info">Send</button>
+                <div class="column">
+                    <div class="tags has-addons is-centered">
+                        <span class="tag is-medium">Status</span>
+                        <span id="status" class="tag is-info is-medium">Getting status</span>
                     </div>
                 </div>
-                <div class="column is-one-third">
-                    <video id="local" autoplay></video>
-                    <video id="remote" autoplay></video>
-                </div>
             </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
             <div class="columns">
-                <div id="drawing-area" class="column is-full">
-                    <canvas id="whiteboard" width="500px" height="500px" style="border:1px solid #d3d3d3;"></canvas>
+                <div class="column is-one-quarter">
+                    <div class="columns is-vcentered">
+                        <div class="column">
+                            <video id="local" poster="img/dan-cristian-padure-eYplZ5_LoZQ-unsplash.jpg" autoplay></video>
+                        </div>
+                    </div>
+                    <div class="columns is-vcentered">
+                        <div class="column">
+                            <video id="remote" poster="img/dima-fedorov-YNoIa_8O4oc-unsplash.jpg" autoplay></video>
+                        </div>
+                    </div>
                 </div>
-            </div>
+                <div id="drawing-area" class="column is-centered">
+                    <canvas id="whiteboard" width="100%" height="100%" style="border:1px solid #dbdbdb;"></canvas>
+                </div>
+                <div class="column is-one-quarter">
+                    <div class="columns">
+                        <div class="column">
+                            <textarea id="message-to-send" class="textarea is-small" placeholder="Enter message..."></textarea>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <div class="control">
+                                <button id="send-button" class="button is-info is-small is-fullwidth">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <ul id="received-messages" style="height: 200px; overflow: auto;">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                </div>
         </div>
     </section>
 

@@ -14,6 +14,7 @@ var sendButton = document.getElementById("send-button");
 
 var MY_ID = "";
 var PEER_ID = "";
+var CONNECTED = false;
 
 var DRAWING = false;
 var DRAWING_DATA = {
@@ -25,10 +26,17 @@ var DRAWING_DATA = {
 const PROTOCOL = {
     TEXT_MESSAGE: 0,
     DRAWING: 1,
+    CANVAS_SETTINGS_INIT: 2,
+    CANVAS_SETTINGS_FINAL: 3,
 };
 
 // Happens to all
 function init() {
+    document.getElementById("message-to-send").setAttribute("disabled", "disabled");
+    document.getElementById("send-button").setAttribute("disabled", "disabled");
+
+    document.getElementById("whiteboard").style.display = "none";
+
     peer = new Peer(null, {});
 
     peer.on("open", function (id) {
@@ -38,8 +46,8 @@ function init() {
         else {
             console.log("My ID is", peer.id);
             MY_ID = peer.id;
-            document.getElementById("my-id").innerHTML = "My ID is " + peer.id;
-            document.getElementById("status").innerHTML = "Status: Awaiting connection...";
+            document.getElementById("my-id").value = peer.id;
+            document.getElementById("status").innerHTML = "Waiting";
         }
     });
 
@@ -48,7 +56,13 @@ function init() {
         conn = c;
         console.log(conn.peer, "connected to you");
         PEER_ID = conn.peer;
-        document.getElementById("status").innerHTML = "Status: " + conn.peer + " connected to you";
+        CONNECTED = true;
+        document.getElementById("status").innerHTML = conn.peer + " connected to you";
+
+        document.getElementById("partners-id").setAttribute("disabled", "disabled");
+        document.getElementById("connect-button").setAttribute("disabled", "disabled");
+        document.getElementById("message-to-send").removeAttribute("disabled");
+        document.getElementById("send-button").removeAttribute("disabled");
         ready();
     });
 
@@ -70,7 +84,13 @@ function join() {
     conn.on("open", function () {
         console.log("Connected to", conn.peer);
         PEER_ID = conn.peer;
-        document.getElementById("status").innerHTML = "Status: Connected to " + conn.peer;
+        CONNECTED = true;
+        document.getElementById("status").innerHTML = "Connected to " + conn.peer;
+
+        document.getElementById("partners-id").setAttribute("disabled", "disabled");
+        document.getElementById("connect-button").setAttribute("disabled", "disabled");
+        document.getElementById("message-to-send").removeAttribute("disabled");
+        document.getElementById("send-button").removeAttribute("disabled");
     });
 
     conn.on("data", function (data) {
@@ -92,6 +112,9 @@ function join() {
 
 // Second move
 function ready() {
+    sendCanvasSize(document.getElementById("drawing-area").offsetWidth, 
+            document.getElementById("drawing-area").offsetHeight, PROTOCOL.CANVAS_SETTINGS_INIT, "second");
+
     conn.on("data", function (data) {
         console.log(conn.peer, "sent you", data);
         handleReceivedData(data);
@@ -124,9 +147,10 @@ function sendTextMessage() {
 // All
 function addMessage(sender, message) {
     var newLiElement = document.createElement("li");
-    var newMessage = document.createTextNode(sender + " at " + Date.now() + ": " + message);
+    var newMessage = document.createTextNode(sender + " at " + Date() + ": " + message);
     newLiElement.appendChild(newMessage);
     document.getElementById("received-messages").appendChild(newLiElement);
+    scrollChatDown();
 }
 
 function drawLine(x0, y0, x1, y1, colour, emit) {
@@ -140,7 +164,6 @@ function drawLine(x0, y0, x1, y1, colour, emit) {
     context.closePath();
 
     if (emit) {
-        // TODO: Form data and send it
         var dataToSend = {
             x0: x0,
             y0: y0,
@@ -169,6 +192,19 @@ function handleReceivedData(data) {
         case PROTOCOL.DRAWING:
             console.log("Drawing...");
             drawLine(data["payload"]["x0"], data["payload"]["y0"], data["payload"]["x1"], data["payload"]["y1"], data["payload"]["colour"], false);
+            break;
+        case PROTOCOL.CANVAS_SETTINGS_INIT:
+            console.log("Canvas negotiation...");
+            var smallestW = (data["payload"]["canvasWidth"] <= document.getElementById("drawing-area").offsetWidth) ? data["payload"]["canvasWidth"] : document.getElementById("drawing-area").offsetWidth;
+            var smallestH = (data["payload"]["canvasHeight"] <= document.getElementById("drawing-area").offsetWidth) ? data["payload"]["canvasHeight"] : document.getElementById("drawing-area").offsetHeight;
+            setCanvasSize(smallestW, smallestH);
+            document.getElementById("whiteboard").style.display = "block";
+            sendCanvasSize(smallestW, smallestH, PROTOCOL.CANVAS_SETTINGS_FINAL, "handler");
+            break;
+        case PROTOCOL.CANVAS_SETTINGS_FINAL:
+            console.log("Canvas final...");
+            setCanvasSize(data["payload"]["canvasWidth"], data["payload"]["canvasHeight"]);
+            document.getElementById("whiteboard").style.display = "block";
             break;
         default:
             console.log("Something new...");
@@ -205,10 +241,31 @@ function onMouseMove(e) {
     DRAWING_DATA.y = drawGetY(e);
 }
 
-// FIXME: Get corrent size as column + drawing disapeer after resize
-function onResize() {
-    document.getElementById("whiteboard").width = document.getElementById("drawing-area").offsetWidth;
-    document.getElementById("whiteboard").height = document.getElementById("drawing-area").offsetHeight;
+// FIXME: Drawing disapeer after resize
+function setCanvasSize(w, h) {
+    document.getElementById("whiteboard").width = w;
+    document.getElementById("whiteboard").height = h;
+}
+
+// Set the same canvas size, no scaling
+function sendCanvasSize(w, h, protocol, note) {
+    console.log(note, "sendCanvasSize", w, h, protocol);
+    var canvasSettings = {
+        canvasWidth: w,
+        canvasHeight: h,
+    };
+    conn.send(preparePacketForSending(protocol, canvasSettings));   
+}
+
+// Front, settings
+function copyMyId() {
+    document.getElementById("my-id").select();
+    document.execCommand("copy");
+}
+
+// Front, chat
+function scrollChatDown(){
+    document.getElementById("received-messages").scrollTop = document.getElementById("received-messages").scrollHeight;
 }
 
 window.addEventListener("load", function () {
@@ -221,5 +278,5 @@ window.addEventListener("load", function () {
     document.getElementById("whiteboard").addEventListener("mouseout", onMouseUp, false);
     document.getElementById("whiteboard").addEventListener("mousemove", onMouseMove, false);
 
-    window.addEventListener("resize", onResize, false);
+    document.getElementById("copy-id-button").addEventListener("click", copyMyId);
 });
