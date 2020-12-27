@@ -9,3 +9,5 @@
 # Knowen bugs
 - [] If resize canvas, draw won't be saved
 - [] Can reconnect, refresh only
+- [] Mobile friendly
+- [] Camera filped
