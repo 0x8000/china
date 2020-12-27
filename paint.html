@@ -18,7 +18,7 @@
     <section class="section">
         <div class="container">
             <div class="columns is-vcentered">
-                <div class="column is-one-quarter">
+                <div class="column is-one-fifth">
                     <div class="field has-addons">
                         <div class="control">
                             <input id="my-id" class="input is-small" type="text" value="My ID" readonly>
@@ -30,7 +30,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="column is-one-quarter">
+                <div class="column is-one-fifth">
                     <div class="field has-addons">
                         <div class="control">
                             <input class="input is-small" type="text" id="partners-id" placeholder="Partner's ID">
@@ -40,6 +40,12 @@
                                 Connect
                             </a>
                         </div>
+                    </div>
+                </div>
+                <div class="column is-one-fifth">
+                    <div class="buttons">
+                        <button class="button is-warning is-small">Settings</button>
+                        <button class="button is-danger is-small">Quit</button>
                     </div>
                 </div>
                 <div class="column">
@@ -68,7 +74,15 @@
                         </div>
                     </div>
                 </div>
-                <div id="drawing-area" class="column is-centered">
+                <div id="drawing-area" class="column">
+                    <div class="buttons is-centered">
+                        <button id="colour-white" class="button is-small"></button>
+                        <button id="colour-black" class="button is-black is-small"></button>
+                        <button id="colour-blue" class="button is-info is-small"></button>
+                        <button id="colour-green" class="button is-success is-small"></button>
+                        <button id="colour-yellow" class="button is-warning is-small"></button>
+                        <button id="colour-red" class="button is-danger is-small"></button>
+                    </div>
                     <center>
                         <canvas id="whiteboard" width="100%" height="100%" style="border:1px solid #dbdbdb;"></canvas>
                     </center>

@@ -16,11 +16,21 @@ var MY_ID = "";
 var PEER_ID = "";
 var CONNECTED = false;
 
+const COLOURS = {
+    WHITE: "#fff",
+    BLACK: "#0a0a0a",
+    BLUE: "#209cee",
+    GREEN: "#23d160",
+    YELLOW: "#ffdd57",
+    RED: "#ff3860"
+};
+var SELECTED_COLOUR = COLOURS.BLACK;
+
 var DRAWING = false;
 var DRAWING_DATA = {
     x: 0,
     y: 0,
-    colour: "#FF0000",
+    colour: COLOURS.BLACK,
 };
 
 const PROTOCOL = {
@@ -171,7 +181,7 @@ function drawLine(x0, y0, x1, y1, colour, emit) {
             y0: y0,
             x1: x1,
             y1: y1,
-            colour: "#FF0000",
+            colour: colour,
         };
         console.log(dataToSend);
         conn.send(preparePacketForSending(PROTOCOL.DRAWING, dataToSend));
@@ -237,12 +247,12 @@ function onMouseDown(e) {
 function onMouseUp(e) {
     if (!DRAWING) { return; }
     DRAWING = false;
-    drawLine(DRAWING_DATA.x, DRAWING_DATA.y, drawGetX(e), drawGetY(e), DRAWING_DATA.colour, true);
+    drawLine(DRAWING_DATA.x, DRAWING_DATA.y, drawGetX(e), drawGetY(e), SELECTED_COLOUR, true);
 }
 
 function onMouseMove(e) {
     if (!DRAWING) { return; }
-    drawLine(DRAWING_DATA.x, DRAWING_DATA.y, drawGetX(e), drawGetY(e), DRAWING_DATA.colour, true);
+    drawLine(DRAWING_DATA.x, DRAWING_DATA.y, drawGetX(e), drawGetY(e), SELECTED_COLOUR, true);
     DRAWING_DATA.x = drawGetX(e);
     DRAWING_DATA.y = drawGetY(e);
 }
@@ -283,4 +293,23 @@ window.addEventListener("load", function () {
     document.getElementById("whiteboard").addEventListener("mousemove", onMouseMove, false);
 
     document.getElementById("copy-id-button").addEventListener("click", copyMyId);
+
+    document.getElementById("colour-white").addEventListener("click", function(){
+        SELECTED_COLOUR = COLOURS.WHITE;
+    });
+    document.getElementById("colour-black").addEventListener("click", function(){
+        SELECTED_COLOUR = COLOURS.BLACK;
+    });
+    document.getElementById("colour-blue").addEventListener("click", function(){
+        SELECTED_COLOUR = COLOURS.BLUE;
+    });
+    document.getElementById("colour-green").addEventListener("click", function(){
+        SELECTED_COLOUR = COLOURS.GREEN;
+    });
+    document.getElementById("colour-yellow").addEventListener("click", function(){
+        SELECTED_COLOUR = COLOURS.YELLOW;
+    });
+    document.getElementById("colour-red").addEventListener("click", function(){
+        SELECTED_COLOUR = COLOURS.RED;
+    });
 });
