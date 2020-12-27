@@ -6,7 +6,7 @@
 3. Enter your "Partner's ID" and press "Connect"
 4. Enjoy speaking and drawing together
 
-# Knowen bugs
+## Knowen bugs
 - [] If resize canvas, draw won't be saved
 - [] Can reconnect, refresh only
 - [] Mobile friendly

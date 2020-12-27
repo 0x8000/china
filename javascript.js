@@ -319,6 +319,13 @@ function textToWhiteboard() {
     DRAWING_TEXT = true;
 }
 
+function saveWhiteboardToJpg() {
+    var image = document.getElementById("whiteboard").toDataURL("image/png");
+    var fileName = "paint+" + Date.now() + ".jpg";
+    document.getElementById("save-whiteboard").setAttribute("href", image);
+    document.getElementById("save-whiteboard").setAttribute("download", fileName);
+}
+
 // Front, settings
 function copyMyId() {
     document.getElementById("my-id").select();
@@ -362,6 +369,7 @@ window.addEventListener("load", function () {
         SELECTED_COLOUR = COLOURS.RED;
     });
     document.getElementById("text-to-whiteboard").addEventListener("click", textToWhiteboard);
+    document.getElementById("save-whiteboard").addEventListener("click", saveWhiteboardToJpg);
 
     // Buttons
     document.getElementById("settings-button").addEventListener("click", function(){
