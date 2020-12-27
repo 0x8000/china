@@ -59,10 +59,12 @@ function init() {
         CONNECTED = true;
         document.getElementById("status").innerHTML = conn.peer + " connected to you";
 
+        // FIXME: Add disconnect
         document.getElementById("partners-id").setAttribute("disabled", "disabled");
         document.getElementById("connect-button").setAttribute("disabled", "disabled");
         document.getElementById("message-to-send").removeAttribute("disabled");
         document.getElementById("send-button").removeAttribute("disabled");
+
         ready();
     });
 
@@ -77,6 +79,7 @@ function init() {
 
 // First move
 function join() {
+    // TODO: Add error handling
     conn = peer.connect(document.getElementById("partners-id").value, {
         reliable: true
     });
@@ -91,6 +94,8 @@ function join() {
         document.getElementById("connect-button").setAttribute("disabled", "disabled");
         document.getElementById("message-to-send").removeAttribute("disabled");
         document.getElementById("send-button").removeAttribute("disabled");
+
+        fixCanvas();
     });
 
     conn.on("data", function (data) {
@@ -112,9 +117,6 @@ function join() {
 
 // Second move
 function ready() {
-    sendCanvasSize(document.getElementById("drawing-area").offsetWidth, 
-            document.getElementById("drawing-area").offsetHeight, PROTOCOL.CANVAS_SETTINGS_INIT, "second");
-
     conn.on("data", function (data) {
         console.log(conn.peer, "sent you", data);
         handleReceivedData(data);
@@ -199,7 +201,11 @@ function handleReceivedData(data) {
             var smallestH = (data["payload"]["canvasHeight"] <= document.getElementById("drawing-area").offsetWidth) ? data["payload"]["canvasHeight"] : document.getElementById("drawing-area").offsetHeight;
             setCanvasSize(smallestW, smallestH);
             document.getElementById("whiteboard").style.display = "block";
-            sendCanvasSize(smallestW, smallestH, PROTOCOL.CANVAS_SETTINGS_FINAL, "handler");
+            var canvasSettings = {
+                canvasWidth: smallestW,
+                canvasHeight: smallestH,
+            };
+            conn.send(preparePacketForSending(PROTOCOL.CANVAS_SETTINGS_FINAL, canvasSettings));
             break;
         case PROTOCOL.CANVAS_SETTINGS_FINAL:
             console.log("Canvas final...");
@@ -247,14 +253,12 @@ function setCanvasSize(w, h) {
     document.getElementById("whiteboard").height = h;
 }
 
-// Set the same canvas size, no scaling
-function sendCanvasSize(w, h, protocol, note) {
-    console.log(note, "sendCanvasSize", w, h, protocol);
+function fixCanvas() {
     var canvasSettings = {
-        canvasWidth: w,
-        canvasHeight: h,
+        canvasWidth: document.getElementById("drawing-area").offsetWidth,
+        canvasHeight: document.getElementById("drawing-area").offsetHeight,
     };
-    conn.send(preparePacketForSending(protocol, canvasSettings));   
+    conn.send(preparePacketForSending(PROTOCOL.CANVAS_SETTINGS_INIT, canvasSettings));
 }
 
 // Front, settings
@@ -264,7 +268,7 @@ function copyMyId() {
 }
 
 // Front, chat
-function scrollChatDown(){
+function scrollChatDown() {
     document.getElementById("received-messages").scrollTop = document.getElementById("received-messages").scrollHeight;
 }
 
