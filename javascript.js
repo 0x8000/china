@@ -272,6 +272,7 @@ function drawGetY(e) {
 function onMouseDown(e) {
     if (DRAWING_TEXT) {
         var text = window.prompt("Enter text");
+        if (text == null) { return; }
         drawText(drawGetX(e), drawGetY(e), text, SELECTED_COLOUR, true);
         DRAWING_TEXT = false;
         document.getElementById("text-to-whiteboard").classList.remove("is-focused");
@@ -323,6 +324,12 @@ function saveWhiteboardToJpg() {
     document.getElementById("save-whiteboard").setAttribute("download", fileName);
 }
 
+function clearWhiteboard() {
+    var canvas = document.getElementById("whiteboard");
+    var context = document.getElementById("whiteboard").getContext("2d");
+    context.clearRect(0, 0, canvas.width, canvas.height);
+}
+
 // Front, settings
 function copyMyId() {
     document.getElementById("my-id").select();
@@ -372,6 +379,7 @@ window.addEventListener("load", function () {
     });
     document.getElementById("text-to-whiteboard").addEventListener("click", textToWhiteboard);
     document.getElementById("save-whiteboard").addEventListener("click", saveWhiteboardToJpg);
+    document.getElementById("clear-whiteboard").addEventListener("click", clearWhiteboard);
 
     // Buttons
     document.getElementById("settings-button").addEventListener("click", function(){
