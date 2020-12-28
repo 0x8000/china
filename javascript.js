@@ -332,6 +332,10 @@ function copyMyId() {
     document.execCommand("copy");
 }
 
+function quit() {
+    location.reload();
+}
+
 // Front, chat
 function scrollChatDown() {
     document.getElementById("received-messages").scrollTop = document.getElementById("received-messages").scrollHeight;
@@ -375,6 +379,7 @@ window.addEventListener("load", function () {
     document.getElementById("settings-button").addEventListener("click", function(){
         document.getElementById("modal-settings").style.display = "flex";
     });
+    document.getElementById("quit-button").addEventListener("click", quit);
 
     // Modal, settings
     document.getElementById("modal-settings-close").addEventListener("click", function(){
@@ -383,8 +388,6 @@ window.addEventListener("load", function () {
     document.getElementById("modal-settings-cancel").addEventListener("click", function(){
         document.getElementById("modal-settings").style.display = "none";
     });
-    
     //modal-settings-save
-    
 
 });
