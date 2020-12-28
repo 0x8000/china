@@ -4,14 +4,6 @@ console.log("Let's paint together!");
 var peer = null;
 var conn = null;
 
-var status = document.getElementById("status");
-var myId = document.getElementById("my-id");
-var partnesId = document.getElementById("partners-id");
-var connectButton = document.getElementById("connect-button");
-var receivedMessage = document.getElementById("received-messages");
-var messageToSend = document.getElementById("message-to-send");
-var sendButton = document.getElementById("send-button");
-
 var MY_ID = "";
 var PEER_ID = "";
 var CONNECTED = false;
@@ -40,6 +32,7 @@ const PROTOCOL = {
     CANVAS_SETTINGS_INIT: 2,
     CANVAS_SETTINGS_FINAL: 3,
     DRAWING_TEXT: 4,
+    QUIT: 5,
 };
 
 // Happens to all
@@ -256,6 +249,10 @@ function handleReceivedData(data) {
             console.log("Drawing text...");
             drawText(data["payload"]["x"], data["payload"]["y"], data["payload"]["text"], data["payload"]["colour"], false);
             break;
+        case PROTOCOL.QUIT:
+            console.log("Quit...");
+            location.reload();
+            break;
         default:
             console.log("Something new...");
             break;
@@ -333,6 +330,7 @@ function copyMyId() {
 }
 
 function quit() {
+    conn.send(preparePacketForSending(PROTOCOL.QUIT, null));
     location.reload();
 }
 
