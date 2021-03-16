@@ -45,7 +45,11 @@ function init() {
     document.getElementById("whiteboard").style.display = "none";
     document.getElementById("colour-buttons").style.display = "none";
 
-    peer = new Peer(null, {});
+    peer = new Peer(null, {
+        secure: true, 
+        host: "paint-clp.herokuapp.com", 
+        port: 443,
+    });
 
     peer.on("open", function (id) {
         if (peer.id === null) {
